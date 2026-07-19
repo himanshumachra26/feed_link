@@ -44,7 +44,13 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/food-requests', foodRequestRoutes);
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Global error handler (must be last)
 app.use(errorHandler);
