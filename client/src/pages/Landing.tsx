@@ -38,7 +38,7 @@ const steps = [
 ];
 
 export default function Landing() {
-  const { user } = useAuth();
+  const { user, loginAsGuest } = useAuth();
 
   if (user) {
     return <Navigate to={user.role === 'DONOR' ? '/donor' : user.role === 'NGO' ? '/ngo' : '/admin'} replace />;
@@ -66,6 +66,9 @@ export default function Landing() {
             <Link to="/login" className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 hover:text-emerald-700">
               Login
             </Link>
+            <button onClick={loginAsGuest} className="rounded-full border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition">
+              Demo Dashboard
+            </button>
             <Link to="/register" className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
               Sign Up
             </Link>
@@ -85,10 +88,17 @@ export default function Landing() {
                 FeedLink helps restaurants, cafés, and kitchens share surplus food with trusted NGOs and shelters in a fast, secure, and transparent way.
               </p>
 
+              <div className="mt-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 text-emerald-800 text-xs">
+                <span className="font-bold">💡 Free Account Access:</span> Login and signup are required for full system access. Registration is 100% free of cost with zero email provider fees or server charges.
+              </div>
+
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/about" className="rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-700">
                   Explore more
                 </Link>
+                <button onClick={loginAsGuest} className="rounded-full border border-emerald-600 bg-white px-6 py-3 font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                  Try Demo Dashboard
+                </button>
                 <a href="#how-it-works" className="rounded-full border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-50">
                   See how it works
                 </a>
@@ -143,6 +153,34 @@ export default function Landing() {
             ))}
           </div>
         </section>
+
+        <footer className="mt-16 border-t border-gray-200 pt-8 pb-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex items-center gap-1.5 text-lg font-bold text-emerald-600 select-none">
+                <span>🌿</span>
+                <span>FeedLink</span>
+              </div>
+              <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-800 uppercase tracking-wider font-bold rounded-full px-2 py-0.5">
+                AdSense Approval Pending
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
+              <Link to="/about" className="hover:text-emerald-600 transition-colors">About Us</Link>
+              <Link to="/blogs" className="hover:text-emerald-600 transition-colors">Blogs</Link>
+              <Link to="/help" className="hover:text-emerald-600 transition-colors">Help & FAQ</Link>
+              <Link to="/terms" className="hover:text-emerald-600 transition-colors">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-emerald-600 transition-colors">Privacy Policy</Link>
+              <Link to="/ads-partner" className="hover:text-emerald-600 transition-colors">Ads Partner</Link>
+              <Link to="/sitemap" className="hover:text-emerald-600 transition-colors">Sitemap</Link>
+            </div>
+
+            <p className="text-xs text-gray-400">
+              &copy; {new Date().getFullYear()} FeedLink. Rescuing food, free of cost.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );

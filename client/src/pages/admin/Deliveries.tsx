@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AppShell from '../../components/layout/AppShell';
-import { Truck, CheckCircle2, Clock, Loader2 } from 'lucide-react';
+import { Truck, Clock, Loader2 } from 'lucide-react';
 import api from '../../api/client';
 
 export default function AdminDeliveries() {

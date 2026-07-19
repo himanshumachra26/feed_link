@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell';
-import { Bell, Lock, ShieldCheck, SlidersHorizontal, UserCircle2, Loader2, CheckCircle2 } from 'lucide-react';
+import { Bell, Lock, ShieldCheck, UserCircle2, Loader2, CheckCircle2 } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
@@ -299,28 +299,7 @@ function SecurityModal({ open, onClose }: any) {
           </div>
         </form>
 
-        {/* Last Login Active Log */}
-        <div className="border-t border-gray-100 pt-4 mt-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Last Active Login</h4>
-          <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs space-y-2.5">
-            <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">Device:</span>
-              <span className="text-gray-800 font-semibold">Windows Desktop PC</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">Browser:</span>
-              <span className="text-gray-800 font-semibold">Google Chrome v126</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">IP Address:</span>
-              <span className="text-gray-800 font-semibold">103.44.82.11 (Mumbai, India)</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">Time:</span>
-              <span className="text-gray-800 font-semibold">16/07/2026, 04:02 PM (Active Session)</span>
-            </div>
-          </div>
-        </div>
+
       </div>
     </Modal>
   );

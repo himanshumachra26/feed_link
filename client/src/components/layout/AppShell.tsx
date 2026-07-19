@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
 import type { Notification } from '../../types';
 import {
   LayoutDashboard, Package, FileText, Users, LogOut,
-  Bell, Menu, X, ShieldCheck, Truck, BarChart3, Settings, UserCircle2, HeartHandshake,
+  Bell, Menu, X, ShieldCheck, Truck, BarChart3, Settings,
 } from 'lucide-react';
 
 // ── Sidebar nav config ────────────────────────────────────────
@@ -328,20 +328,352 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   );
 }
 
+function GuestAuthOverlay({ onClose, isRestricted }: { onClose?: () => void; isRestricted: boolean }) {
+  const { user, login, register: signUp } = useAuth();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<'login' | 'register'>('login');
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [orgName, setOrgName] = useState('');
+  const [role, setRole] = useState<'DONOR' | 'NGO'>('DONOR');
+  const [phone, setPhone] = useState('');
+  const [city, setCity] = useState('');
+  
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleClose = () => {
+    if (isRestricted) {
+      const currentRole = user?.role || 'DONOR';
+      navigate(currentRole === 'DONOR' ? '/donor' : currentRole === 'NGO' ? '/ngo' : '/admin');
+    } else {
+      if (onClose) onClose();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      if (tab === 'login') {
+        await login(email, password);
+        const token = localStorage.getItem('token');
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          navigate(payload.role === 'DONOR' ? '/donor' : payload.role === 'NGO' ? '/ngo' : '/admin');
+        }
+      } else {
+        await signUp({ email, password, role, orgName, phone, city });
+        navigate(role === 'DONOR' ? '/donor' : '/ngo');
+      }
+      if (onClose) onClose();
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Authentication failed. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-[2px] overflow-y-auto">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-2xl w-full max-w-md my-8 relative">
+        <button 
+          onClick={handleClose} 
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1.5 transition-colors cursor-pointer"
+        >
+          <X size={18} />
+        </button>
+        
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-1.5 text-2xl font-bold text-emerald-600 mb-1">
+            <span>🌿</span>
+            <span>FeedLink</span>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mt-1">
+            {isRestricted ? "Restricted Area" : "Authentication Required"}
+          </h3>
+          <p className="text-gray-500 text-xs mt-1">
+            {isRestricted 
+              ? "Access to settings, records, reports, operational hub, and profile is restricted to registered members. Please sign in or register." 
+              : "To make changes or perform this action, please sign in or register first."}
+          </p>
+        </div>
+
+        {/* Tab Header */}
+        <div className="flex border-b border-gray-100 mb-5">
+          <button
+            type="button"
+            onClick={() => { setTab('login'); setError(''); }}
+            className={`flex-1 pb-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${tab === 'login' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-gray-550 hover:text-gray-800'}`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTab('register'); setError(''); }}
+            className={`flex-1 pb-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${tab === 'register' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-gray-550 hover:text-gray-800'}`}
+          >
+            Create Account
+          </button>
+        </div>
+
+        {error && (
+          <p className="text-xs text-red-650 bg-red-50 border border-red-100 px-3 py-2 rounded-lg mb-4">{error}</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Email address</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm placeholder-gray-405 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm placeholder-gray-405 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+
+          {tab === 'register' && (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Organization / Name</label>
+                <input
+                  type="text"
+                  required
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  placeholder="Green Cafe / Food Shelter"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm placeholder-gray-405 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone number</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 XXXXX XXXXX"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm placeholder-gray-405 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">City</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="City name"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm placeholder-gray-405 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Role Type</label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reg-role"
+                      value="DONOR"
+                      checked={role === 'DONOR'}
+                      onChange={() => setRole('DONOR')}
+                      className="accent-emerald-600"
+                    />
+                    Donor (Food Provider)
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reg-role"
+                      value="NGO"
+                      checked={role === 'NGO'}
+                      onChange={() => setRole('NGO')}
+                      className="accent-emerald-600"
+                    />
+                    NGO (Food Receiver)
+                  </label>
+                </div>
+              </div>
+            </>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition disabled:opacity-50 cursor-pointer text-center mt-3"
+          >
+            {loading ? "Processing..." : tab === 'login' ? "Sign In" : "Register"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ── Main App Shell ─────────────────────────────────────────────
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+  const { user, setGuestRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isGuest = localStorage.getItem('isGuest') === 'true';
+  const [showAuthOverlay, setShowAuthOverlay] = useState(false);
+
+  useEffect(() => {
+    const handleLoginRequired = () => {
+      setShowAuthOverlay(true);
+    };
+    window.addEventListener('guest-login-required', handleLoginRequired);
+    return () => {
+      window.removeEventListener('guest-login-required', handleLoginRequired);
+    };
+  }, []);
+
+  // Intercept all interactive clicks inside main content for guest users
+  useEffect(() => {
+    if (!isGuest) return;
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const mainElement = document.querySelector('main');
+      if (!mainElement || !mainElement.contains(e.target as Node)) return;
+
+      let target = e.target as HTMLElement | null;
+      let isInteractive = false;
+
+      while (target && target !== mainElement) {
+        const tagName = target.tagName.toLowerCase();
+        if (
+          tagName === 'button' ||
+          tagName === 'input' ||
+          tagName === 'select' ||
+          tagName === 'textarea' ||
+          tagName === 'a' ||
+          target.getAttribute('role') === 'button' ||
+          target.classList.contains('cursor-pointer')
+        ) {
+          // Bypass if clicking inside login overlay or the role selector
+          if (target.closest('.guest-auth-overlay') || target.closest('.explore-role-selector')) {
+            break;
+          }
+          isInteractive = true;
+          break;
+        }
+        target = target.parentElement;
+      }
+
+      if (isInteractive) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.dispatchEvent(new CustomEvent('guest-login-required'));
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    return () => {
+      window.removeEventListener('click', handleGlobalClick, true);
+    };
+  }, [isGuest]);
+
+  const isRestrictedPage = isGuest && (
+    location.pathname.includes('/settings') ||
+    location.pathname.includes('/profile')
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className={`min-h-screen flex flex-col transition-all duration-200 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
-        <Topbar onMenuClick={toggleSidebar} />
-        <main className="flex-1 p-5 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
+    <div className="min-h-screen bg-gray-50 flex flex-col relative">
+      {/* Guest Warning Banner */}
+      {isGuest && (
+        <div className="bg-emerald-600 text-white px-4 py-2 text-xs md:text-sm font-semibold flex flex-wrap gap-2 items-center justify-between shadow-md z-30">
+          <div className="flex items-center gap-1.5">
+            <span>🛡️</span>
+            <span>You are browsing as Guest. Sensitive information (names, emails, etc.) is masked with ***.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Explore pages as:</span>
+            <select
+              value={user?.role || 'DONOR'}
+              onChange={(e) => {
+                const role = e.target.value as any;
+                if (setGuestRole) {
+                  setGuestRole(role);
+                  navigate(role === 'DONOR' ? '/donor' : role === 'NGO' ? '/ngo' : '/admin');
+                }
+              }}
+              className="bg-white text-emerald-800 rounded px-2 py-0.5 border-none font-bold text-xs cursor-pointer focus:ring-2 focus:ring-emerald-300 explore-role-selector"
+            >
+              <option value="DONOR">Donor Dashboard</option>
+              <option value="NGO">NGO Dashboard</option>
+              <option value="ADMIN">Admin Dashboard</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Main Layout wrapper */}
+      <div className="flex-1 flex flex-row relative">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className={`flex-1 min-h-screen flex flex-col transition-all duration-200 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
+          <Topbar onMenuClick={toggleSidebar} />
+          <main className={`flex-1 p-5 max-w-7xl w-full mx-auto transition-all ${isRestrictedPage ? 'blur-[6px] pointer-events-none select-none' : ''}`}>
+            {children}
+          </main>
+
+          {/* Shared Panel Footer */}
+          <footer className="border-t border-gray-200 bg-white py-6 px-5 mt-auto">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+              <div className="flex flex-col sm:flex-row items-center gap-1.5 font-bold text-emerald-600">
+                <span className="flex items-center gap-1">
+                  <span>🌿</span>
+                  <span>FeedLink</span>
+                </span>
+                <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-800 uppercase tracking-wider font-bold rounded-full px-2 py-0.5">
+                  AdSense Approval Pending
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Link to="/about" className="hover:text-emerald-600 transition-colors">About Us</Link>
+                <Link to="/blogs" className="hover:text-emerald-600 transition-colors">Blogs</Link>
+                <Link to="/help" className="hover:text-emerald-600 transition-colors">Help & FAQ</Link>
+                <Link to="/terms" className="hover:text-emerald-600 transition-colors">Terms</Link>
+                <Link to="/privacy" className="hover:text-emerald-600 transition-colors">Privacy</Link>
+                <Link to="/ads-partner" className="hover:text-emerald-600 transition-colors">Ads Partner</Link>
+                <Link to="/sitemap" className="hover:text-emerald-600 transition-colors">Sitemap</Link>
+              </div>
+              <p>&copy; {new Date().getFullYear()} FeedLink. Free platform.</p>
+            </div>
+          </footer>
+        </div>
       </div>
+
+      {/* Guest Login/Signup Overlay */}
+      {(isRestrictedPage || showAuthOverlay) && (
+        <div className="guest-auth-overlay">
+          <GuestAuthOverlay 
+            isRestricted={isRestrictedPage} 
+            onClose={() => setShowAuthOverlay(false)} 
+          />
+        </div>
+      )}
     </div>
   );
 }

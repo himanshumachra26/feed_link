@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AppShell from '../../components/layout/AppShell';
-import { Package, Search, Filter, Loader2, ShieldCheck } from 'lucide-react';
+import { Package, Loader2, ShieldCheck } from 'lucide-react';
 import api from '../../api/client';
 
 export default function AdminListings() {

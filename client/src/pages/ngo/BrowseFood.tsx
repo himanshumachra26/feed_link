@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AppShell from '../../components/layout/AppShell';
-import { Package, MapPin, Clock, Search, Filter, ShieldCheck, Loader2 } from 'lucide-react';
+import { Package, MapPin, Clock, Search, ShieldCheck, Loader2 } from 'lucide-react';
 import api from '../../api/client';
 import type { Listing } from '../../types';
 

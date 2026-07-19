@@ -145,6 +145,67 @@ export default function OperationsHub() {
             );
           })}
         </div>
+
+        {/* Operational Documents & Resource Library */}
+        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <FileText className="text-emerald-600" size={20} />
+              Resource Library & Operational Guidelines
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Access standard operating procedures, template logs, safety guidelines, and legal documents for food donations.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                title: 'Food Safety Standard Operating Procedures (SOP)',
+                desc: 'Official guidelines on food temperatures, hygiene, shelf-life validation, allergen controls, and packaging requirements.',
+                type: 'PDF Guide',
+                size: '1.4 MB',
+              },
+              {
+                title: 'Good Samaritan Food Protection Guide',
+                desc: 'A comprehensive summary of liability protections and legal rights for food donors and distribution charities.',
+                type: 'PDF Document',
+                size: '890 KB',
+              },
+              {
+                title: 'NGO Logbook & Handover Protocol Template',
+                desc: 'A print-friendly logbook template for NGOs to record food weight, donor source, transit time, and temperature at receipt.',
+                type: 'XLSX Sheet',
+                size: '420 KB',
+              },
+              {
+                title: 'Volunteer Onboarding & Training Checklist',
+                desc: 'Quick instruction guide for training volunteers on safe food handling, pickup logs, and community distribution protocols.',
+                type: 'DOCX Template',
+                size: '1.2 MB',
+              },
+            ].map((doc) => (
+              <article key={doc.title} className="rounded-2xl border border-gray-100 p-4 bg-gray-50/50 flex flex-col justify-between hover:border-emerald-100 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="rounded bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                      {doc.type}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-semibold">{doc.size}</span>
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm">{doc.title}</h3>
+                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{doc.desc}</p>
+                </div>
+                <button
+                  type="button"
+                  className="mt-4 w-full rounded-xl border border-emerald-600 bg-white py-2 text-center text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition cursor-pointer"
+                >
+                  Download File
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </AppShell>
   );

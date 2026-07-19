@@ -20,6 +20,12 @@ import SettingsPage from './pages/shared/SettingsPage';
 import DonorRequests from './pages/donor/Requests';
 import NgoBrowseFood from './pages/ngo/BrowseFood';
 import NgoRequests from './pages/ngo/MyRequests';
+import Terms from './pages/shared/Terms';
+import Privacy from './pages/shared/Privacy';
+import Help from './pages/shared/Help';
+import Blogs from './pages/shared/Blogs';
+import Sitemap from './pages/shared/Sitemap';
+import AdsPartner from './pages/shared/AdsPartner';
 
 function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode; allowedRole?: 'DONOR' | 'NGO' | 'ADMIN' }) {
   const { user, loading } = useAuth();
@@ -37,6 +43,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/sitemap" element={<Sitemap />} />
+          <Route path="/ads-partner" element={<AdsPartner />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/donor" element={<ProtectedRoute allowedRole="DONOR"><DonorDashboard /></ProtectedRoute>} />
